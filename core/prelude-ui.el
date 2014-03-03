@@ -67,8 +67,12 @@
 
 ;; more useful frame title, that show either a file or a
 ;; buffer name (if the buffer isn't visiting a file)
+;; (setq frame-title-format
+;;       '("" invocation-name " Prelude - " (:eval (if (buffer-file-name)
+;;                                             (abbreviate-file-name (buffer-file-name))
+;;                                           "%b"))))
 (setq frame-title-format
-      '("" invocation-name " Prelude - " (:eval (if (buffer-file-name)
+      '("" invocation-name " - " (:eval (if (buffer-file-name)
                                             (abbreviate-file-name (buffer-file-name))
                                           "%b"))))
 
