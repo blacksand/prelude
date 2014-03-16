@@ -47,7 +47,9 @@
   )
 
 (if (eq system-type 'windows-nt)
-    (cygwin-environ-setup))
+    (progn
+      (cygwin-environ-setup)
+      (set-shell-cygwin)))
 
 (provide 'init-cygwin)
 
