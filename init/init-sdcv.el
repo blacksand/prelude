@@ -1,4 +1,7 @@
 ;;; init-sdcv.el --- setting sdcv
+
+(prelude-require-package 'popup)
+
 (if (eq system-type 'windows-nt)
     (setq sdcv-execute-file "e:/cygwin32/bin/sdcv"))
 
@@ -20,30 +23,32 @@
 
 (defun call-sdcv+ ()
   (interactive)
-  (if (eq system-type 'windows-nt)
-      (let ((coding-system-for-read 'utf-8-unix)
-            (coding-system-for-write 'gbk-unix))
-        (sdcv-search-pointer+))
-    (sdcv-search-pointer+))
+  (save-excursion
+    (if (eq system-type 'windows-nt)
+        (let ((coding-system-for-read 'utf-8-unix)
+              (coding-system-for-write 'gbk-unix))
+          (sdcv-search-pointer+))
+      (sdcv-search-pointer+)))
   )
 
 (defun call-sdcv ()
   (interactive)
-  (if (eq system-type 'windows-nt)
-      (let ((coding-system-for-read 'utf-8-unix)
-            (coding-system-for-write 'gbk-unix))
-        (sdcv-search-input))
-    (sdcv-search-input))
+  (save-excursion
+    (if (eq system-type 'windows-nt)
+        (let ((coding-system-for-read 'utf-8-unix)
+              (coding-system-for-write 'gbk-unix))
+          (sdcv-search-input))
+      (sdcv-search-input)))
   )
 
 ;; 需要先去除 prelude 中的冲突快捷键
-(define-key prelude-mode-map (kbd "C-c d") nil)
-(define-key prelude-mode-map (kbd "C-c t") nil)
+(define-key prelude-mode-map (kbd "C-c s") nil)
+(define-key prelude-mode-map (kbd "C-c S") nil)
 
 ;; (global-set-key (kbd "C-c t") 'call-sdcv)
 ;; (global-set-key (kbd "C-c d") 'call-sdcv+)
-(global-set-key (kbd "C-c t") 'sdcv-search-input)
-(global-set-key (kbd "C-c d") 'sdcv-search-pointer+)
+(global-set-key (kbd "C-c S") 'sdcv-search-input)
+(global-set-key (kbd "C-c s") 'sdcv-search-pointer+)
 
 (provide 'init-sdcv)
 
