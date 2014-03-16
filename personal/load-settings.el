@@ -14,12 +14,14 @@
 (add-to-list 'load-path personal-init-dir)
 
 ;; load needed modules
-;; (require 'init-encoding)                ; windows encoding settings
-(require 'init-ui)                      ; gui, fonts
-(require 'init-sdcv)                    ; before the `init-cygwin'
-(require 'init-cygwin)                  ; bash, zsh
-(require 'init-evil)                    ; evil
+;; (require 'init-encoding)     ; windows encoding settings
+(require 'init-ui)              ; gui, fonts
+(require 'init-sdcv)            ; before the `init-cygwin'
+(if (eq system-type 'windows-nt)
+    (require 'init-cygwin))     ; bash, zsh
 
-(require 'init-misc)                    ; server-mode
+(require 'init-evil)            ; evil
+(require 'init-org)
+(require 'init-misc)            ; server-mode
 
 ;;; load-settings.el ends here
