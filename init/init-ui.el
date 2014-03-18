@@ -26,9 +26,9 @@
 
       (load-theme 'solarized-dark t)))
 
-;; (prelude-require-package 'powerline)
-;; (require 'powerline)
-;; (powerline-default-theme)
+(prelude-require-package 'powerline)
+(require 'powerline)
+(powerline-default-theme)
 
 ;; Setting font
 (let ((english-font "Consolas")
