@@ -1,5 +1,7 @@
+(add-to-list 'Info-default-directory-list "~/following/org-mode/doc")
+(add-to-list 'load-path (expand-file-name "~/following/org-mode/lisp"))
+(add-to-list 'load-path (expand-file-name "~/following/org-mode/contrib/lisp"))
 
-(require 'org)
 (setq org-modules (quote (org-bibtex
                           org-crypt
                           org-id
@@ -10,6 +12,9 @@
                           org-mhe
                           org-protocol
                           org-w3m)))
+
+(require 'org)
+(require 'prelude-org)
 
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
@@ -52,19 +57,23 @@
           (lambda ()
             (setq evil-auto-indent nil)
             (whitespace-toggle-options 'lines-tail) ;; turn off lines-tail
-            (local-set-key "\M-\C-n" 'outline-next-visible-heading)
-            (local-set-key "\M-\C-p" 'outline-previous-visible-heading)
-            (local-set-key "\M-\C-f" 'outline-forward-same-level)
-            (local-set-key "\M-\C-b" 'outline-backward-same-level)
-            (local-set-key "\M-\C-u" 'outline-up-heading)
-            (local-set-key "\M-\C-w" 'org-table-copy-region)
-            (local-set-key "\M-\C-y" 'org-table-paste-rectangle)
-            (local-set-key "\M-\C-l" 'org-table-sort-lines)
-            (local-set-key "\M-I" 'org-toggle-inline-images) ;; display images
-            (local-set-key (kbd "<f5>") 'bh/org-todo)
+            (local-set-key "\M-\C-n"      'outline-next-visible-heading)
+            (local-set-key "\M-\C-p"      'outline-previous-visible-heading)
+            (local-set-key "\M-\C-f"      'outline-forward-same-level)
+            (local-set-key "\M-\C-b"      'outline-backward-same-level)
+            (local-set-key "\M-\C-u"      'outline-up-heading)
+            (local-set-key "\M-\C-w"      'org-table-copy-region)
+            (local-set-key "\M-\C-y"      'org-table-paste-rectangle)
+            (local-set-key "\M-\C-l"      'org-table-sort-lines)
+            (local-set-key "\M-I"         'org-toggle-inline-images)
+            (local-set-key (kbd "C-c t")  'org-todo)
+            (local-set-key (kbd "<f5>")   'bh/org-todo)
             (local-set-key (kbd "<S-f5>") 'bh/widen)
             (local-set-key (kbd "<f9> h") 'bh/hide-other))
           'append)
+
+;; remove key bindings in prelude
+(define-key prelude-mode-map (kbd "C-c t") nil)
 
 ;; Custom Key Bindings
 (global-set-key (kbd "<f12>") 'org-agenda)
@@ -120,21 +129,21 @@
 
 (defun bh/make-org-scratch ()
   (interactive)
-  (find-file "/tmp/publish/scratch.org")
-  (gnus-make-directory "/tmp/publish"))
+  (let ((temp-dir (expand-file-name "publish" (getenv "TEMP"))))
+    (find-file (expand-file-name "scratch.org" temp-dir))
+    (gnus-make-directory temp-dir)))
 
 (defun bh/switch-to-scratch ()
   (interactive)
   (switch-to-buffer "*scratch*"))
 
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "NEXT(n)" "APPT(a)" "|" "DONE(d)")
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
         (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
 
 (setq org-todo-keyword-faces
       '(("TODO"      :foreground "red" :weight bold)
         ("NEXT"      :foreground "cyan" :weight bold)
-        ("APPT"      :foreground "yellow" :weight bold)
         ("DONE"      :foreground "forest green" :weight bold)
         ("WAITING"   :foreground "orange" :weight bold)
         ("HOLD"      :foreground "magenta" :weight bold)
@@ -151,37 +160,34 @@
         (done ("WAITING") ("HOLD"))
         ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
         ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
-        ("APPT" ("WAITING") ("CANCELLED") ("HOLD"))
         ("DONE" ("WAITING") ("CANCELLED") ("HOLD"))))
 
-(let ((inbox-file (expand-file-name "inbox.org" bs-gtd-dir))
-      (journal-file (expand-file-name "journal.org" bs-gtd-dir))
-      (timelog-file (expand-file-name "timelog.org" bs-gtd-dir)))
-  (setq org-directory bs-gtd-dir)
-  (setq org-default-notes-file inbox-file)
-  (setq org-capture-templates
-        '(("a" "Appointment" entry (file inbox-file)
-           "* APPT %?\n%U\n%^{Time}T" :empty-lines 1)
-          ("n" "Notes" entry (file inbox-file)
-           "* %? :NOTE:\n%U" :clock-in t :clock-resume t :empty-lines 1)
-          ("t" "Task" entry (file inbox-file)
-           "* TODO %? %^g\n%U" :clock-in t :clock-resume t :empty-lines 1)
-          ("j" "Journal" entry (file+datetree journal-file)
-           "* %?\n%U" :clock-in t :clock-resume t :empty-lines 1)
-          ("w" "org-protocol" entry (file inbox-file)
-           "* %? :NOTE:\n%U\n%c\n%i" :clock-in t :clock-resume t :empty-lines 1)
-          ("l" "Log Time" entry (file+datetree timelog-file)
-           "* %U - %? :TIME:" :empty-lines 1)
-          ("h" "Habit" entry (file inbox-file)
-           "* NEXT %?\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n%U"
-           :empty-lines 1))))
+(setq bs/inbox-file (expand-file-name "inbox.org" bs-gtd-dir))
+(setq org-directory (expand-file-name "~/doc/org"))
+(setq org-default-notes-file bs/inbox-file)
+(setq org-capture-templates
+      '(("a" "Appointment" entry (file bs/inbox-file)
+         "* %?\nAdded: %U\n%^{Time}T\n" :empty-lines 1)
+        ("n" "Notes" entry (file bs/inbox-file)
+         "* %? :NOTE:\nAdded: %U\n" :clock-in t :clock-resume t :empty-lines 1)
+        ("t" "Task" entry (file bs/inbox-file)
+         "* TODO %?\nAdded: %U\n" :clock-in t :clock-resume t :empty-lines 1)
+        ("j" "Journal" entry (file+datetree (expand-file-name "journal.org" bs-gtd-dir))
+         "* %?\nAdded: %U\n" :clock-in t :clock-resume t :empty-lines 1)
+        ("w" "org-protocol" entry (file bs/inbox-file)
+         "* %? :NOTE:\nAdded: %U\n%c\n%i\n" :clock-in t :clock-resume t :empty-lines 1)
+        ("l" "Log Time" entry (file+datetree (expand-file-name "timelog.org" bs-gtd-dir))
+         "* %U - %^{Description} :TIME:\n" :immediate-finish t :empty-lines 0)
+        ("h" "Habit" entry (file bs/inbox-file)
+         "* NEXT %?\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\nAdded: %U\n"
+         :empty-lines 1)))
 
 ;; Remove empty LOGBOOK drawers on clock out
 (defun bh/remove-empty-drawer-on-clock-out ()
   (interactive)
   (save-excursion
     (beginning-of-line 0)
-    (org-remove-empty-drawer-at "LOGBOOK" (point))))
+    (org-remove-empty-drawer-at (point))))
 
 (add-hook 'org-clock-out-hook 'bh/remove-empty-drawer-on-clock-out 'append)
 
@@ -215,15 +221,6 @@
 
 (add-hook 'ido-setup-hook 'bs/ido-define-keys)
 
-;; use Prelude default settings
-;; (setq ido-max-directory-size 100000)
-;; (ido-mode (quote both))
-;; ; Use the current window when visiting files and buffers with ido
-;; (setq ido-default-file-method 'selected-window)
-;; (setq ido-default-buffer-method 'selected-window)
-;; ; Use the current window for indirect buffer display
-;; (setq org-indirect-buffer-display 'current-window)
-
 ;; Do not dim blocked tasks
 (setq org-agenda-dim-blocked-tasks nil)
 
@@ -242,7 +239,7 @@
         (" " "Agenda"
          ((agenda "" nil)
           (tags "INBOX"
-                ((org-agenda-overriding-header "Inbox")
+                ((org-agenda-overriding-header "Tasks to Refile")
                  (org-tags-match-list-sublevels nil)))
           (tags-todo "-CANCELLED/!"
                      ((org-agenda-overriding-header "Stuck Projects")
@@ -318,9 +315,7 @@
 ;; Change tasks to NEXT when clocking in
 (setq org-clock-in-switch-to-state 'bh/clock-in-to-next)
 ;; Separate drawers for clocking and logs
-;; (setq org-drawers (quote ("PROPERTIES" "LOGBOOK" "RESULTS")))
-(if (member "CLOCK" org-drawers)
-    (delete "CLOCK" org-drawers))
+(setq org-drawers (quote ("PROPERTIES" "CLOCK" "LOGBOOK" "RESULTS")))
 ;; Save clock data and state changes and notes in the LOGBOOK drawer
 (setq org-clock-into-drawer t)
 ;; Sometimes I change tasks I'm clocking quickly - this removes clocked tasks with 0:00 duration
@@ -369,17 +364,13 @@ as the default task."
   (interactive "p")
   (setq bh/keep-clock-running t)
   (if (equal major-mode 'org-agenda-mode)
-      ;;
       ;; We're in the agenda
-      ;;
       (let* ((marker (org-get-at-bol 'org-hd-marker))
              (tags (org-with-point-at marker (org-get-tags-at))))
         (if (and (eq arg 4) tags)
             (org-agenda-clock-in '(16))
           (bh/clock-in-organization-task-as-default)))
-    ;;
     ;; We are not in the agenda
-    ;;
     (save-restriction
       (widen)
       ;; Find the tags on the current task
@@ -431,9 +422,8 @@ as the default task."
 (add-hook 'org-clock-out-hook 'bh/clock-out-maybe 'append)
 
 (defun bh/clock-in-last-task (arg)
-  "Clock in the interrupted task if there is one
-Skip the default task and get the next one.
-A prefix arg forces clock in of the default task."
+  "Clock in the interrupted task if there is one Skip the default task and get
+the next one. A prefix arg forces clock in of the default task."
   (interactive "p")
   (let ((clock-in-to-task
          (cond
@@ -799,7 +789,7 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 (add-hook 'org-finalize-agenda-hook 'bh/org-agenda-to-appt 'append)
 
 ;; This is at the end of my .emacs - so appointments are set up when Emacs starts
-(bh/org-agenda-to-appt)
+(prelude-eval-after-init (bh/org-agenda-to-appt))
 
 ;; Activate appointments so we get notifications
 (appt-activate t)
@@ -1020,7 +1010,8 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
 (setq org-agenda-insert-diary-extract-time t)
 
 ;; Include agenda archive files when searching for things
-(setq org-agenda-text-search-extra-files (quote (agenda-archives)))
+;; (setq org-agenda-text-search-extra-files '(agenda-archives))
+(setq org-agenda-text-search-extra-files '(agenda-archives "~/doc/org/OrgMode.org"))
 
 ;; Show all future entries for repeating tasks
 (setq org-agenda-repeating-timestamp-show-all t)
@@ -1141,6 +1132,8 @@ Late deadlines first, then scheduled, then non-late deadlines"
 ;; Use sticky agenda's so they persist
 (setq org-agenda-sticky t)
 
+(require 'org-checklist)
+
 (setq org-enforce-todo-dependencies t)
 
 (setq org-hide-leading-stars nil)
@@ -1165,6 +1158,7 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (setq org-yank-adjusted-subtrees t)
 
 (setq org-id-method 'uuid)
+(setq org-id-locations-file (expand-file-name "org-id-locations" prelude-savefile-dir))
 
 (setq org-deadline-warning-days 30)
 
@@ -1180,6 +1174,7 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (setq org-log-state-notes-insert-after-drawers nil)
 
 (setq org-clock-sound "~/dotfiles/misc/sound/ah-oh.wav")
+(setq org-clock-persist-file (expand-file-name "org-clock-save.el" prelude-savefile-dir))
 
 (setq org-habit-graph-column 50)
 (run-at-time "06:00" 86400 '(lambda () (setq org-habit-show-habits t)))
@@ -1265,7 +1260,7 @@ Late deadlines first, then scheduled, then non-late deadlines"
 
 (defun bh/insert-inactive-timestamp ()
   (interactive)
-  (org-insert-time-stamp nil t t nil nil nil))
+  (org-insert-time-stamp nil t t "Added: " nil nil))
 
 (defun bh/insert-heading-inactive-timestamp ()
   (save-excursion
@@ -1333,6 +1328,9 @@ Late deadlines first, then scheduled, then non-late deadlines"
       '(:hours "%d" :require-hours t :minutes ":%02d" :require-minutes t))
 
 (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+
+(require 'org-mobile)
+(setq org-mobile-directory "~/Dropbox/MobileOrg")
 
 (setq org-emphasis-alist '(("*" bold)
                            ("/" italic)
