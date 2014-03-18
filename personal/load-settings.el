@@ -22,6 +22,7 @@
 
 (require 'init-evil)            ; evil
 (require 'init-org)
+(require 'init-completion)
 (require 'init-misc)            ; server-mode
 
 ;;; load-settings.el ends here
