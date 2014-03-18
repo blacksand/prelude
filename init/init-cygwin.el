@@ -5,6 +5,7 @@
 (defun set-shell-cygwin()
   "Set shell-command use `bash', shell-mode use `zsh'."
   (interactive)
+  (setenv "LANG" "zh_CN.UTF-8")
   (setq null-device "/dev/null")
   (setq shell-file-name "bash")
   (setq explicit-shell-file-name "zsh")
@@ -13,20 +14,19 @@
 
   (setenv "SHELL" explicit-shell-file-name)
   (setq default-process-coding-system '(utf-8-dos . gbk-unix))
-  (setq sdcv-execute-file "/e/cygwin32/bin/sdcv")
-  )
+  (setq sdcv-execute-file "/e/cygwin32/bin/sdcv"))
 
 (defun set-shell-cmdproxy()
   "Set shell to `cmdproxy'."
   (interactive)
+  (setenv "LANG" "zh_CN.GBK")
   (setq null-device "NUL")
   (setq shell-file-name "cmdproxy.exe")
   (setq explicit-shell-file-name shell-file-name)
 
   (setenv "SHELL" shell-file-name)
   (setq default-process-coding-system '(gbk-dos . gbk-unix))
-  (setq sdcv-execute-file "e:/cygwin32/bin/sdcv")
-  )
+  (setq sdcv-execute-file "e:/cygwin32/bin/sdcv"))
 
 (defun zsh()
   "Use cygwin zsh shell."
@@ -40,11 +40,10 @@
   (require 'cygwin-mount)
   (cygwin-mount-activate)
 
-  (modify-coding-system-alist 'process "[zZ]sh" '(utf-8-dos . utf-8-unix))
-  (modify-coding-system-alist 'process "[bB]ash" '(undecided-dos . undecided-unix))
   ;; (setq cygwin-root-directory "e:/cygwin")
   ;; (require 'setup-cygwin)
-  )
+  (modify-coding-system-alist 'process "[zZ]sh" '(utf-8-dos . utf-8-unix))
+  (modify-coding-system-alist 'process "[bB]ash" '(undecided-dos . undecided-unix)))
 
 (if (eq system-type 'windows-nt)
     (progn
