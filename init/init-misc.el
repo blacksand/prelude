@@ -8,6 +8,12 @@
 ;; 不用 guru 模式
 (setq prelude-guru nil)
 
+;; 隐藏一些不需要的模式行信息
+(diminish 'prelude-mode)
+(diminish 'whitespace-mode)
+(diminish 'visual-line-mode)
+(diminish 'abbrev-mode)
+
 ;; windows 下不使用 flyspell
 (unless (eq system-type 'windows-nt)
   (flyspell-prog-mode))
