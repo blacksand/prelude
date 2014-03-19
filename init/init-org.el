@@ -167,19 +167,19 @@
 (setq org-default-notes-file bs/inbox-file)
 (setq org-capture-templates
       '(("a" "Appointment" entry (file bs/inbox-file)
-         "* %?\nAdded: %U\n%^{Time}T\n" :empty-lines 1)
+         "* %?\n:LOGBOOK:\nAdded: %U\n:END:\n%^{Time}T" :empty-lines 1)
         ("n" "Notes" entry (file bs/inbox-file)
-         "* %? :NOTE:\nAdded: %U\n" :clock-in t :clock-resume t :empty-lines 1)
+         "* %? :NOTE:\n:LOGBOOK:\nAdded: %U\n:END:" :clock-in t :clock-resume t :empty-lines 1)
         ("t" "Task" entry (file bs/inbox-file)
-         "* TODO %?\nAdded: %U\n" :clock-in t :clock-resume t :empty-lines 1)
+         "* TODO %?\n:LOGBOOK:\nAdded: %U\n:END:" :clock-in t :clock-resume t :empty-lines 1)
         ("j" "Journal" entry (file+datetree (expand-file-name "journal.org" bs-gtd-dir))
-         "* %?\nAdded: %U\n" :clock-in t :clock-resume t :empty-lines 1)
+         "* %?\n:LOGBOOK:\nAdded: %U\n:END:\n" :clock-in t :clock-resume t :empty-lines 1)
         ("w" "org-protocol" entry (file bs/inbox-file)
-         "* %? :NOTE:\nAdded: %U\n%c\n%i\n" :clock-in t :clock-resume t :empty-lines 1)
+         "* %? :NOTE:\n:LOGBOOK:\nAdded: %U\n:END:\n%c\n%i\n" :clock-in t :clock-resume t :empty-lines 1)
         ("l" "Log Time" entry (file+datetree (expand-file-name "timelog.org" bs-gtd-dir))
          "* %U - %^{Description} :TIME:\n" :immediate-finish t :empty-lines 0)
         ("h" "Habit" entry (file bs/inbox-file)
-         "* NEXT %?\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\nAdded: %U\n"
+         "* NEXT %?\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n:LOGBOOK:\nAdded: %U\n:END:"
          :empty-lines 1)))
 
 ;; Remove empty LOGBOOK drawers on clock out
@@ -1260,7 +1260,10 @@ Late deadlines first, then scheduled, then non-late deadlines"
 
 (defun bh/insert-inactive-timestamp ()
   (interactive)
-  (org-insert-time-stamp nil t t "Added: " nil nil))
+  (save-excursion
+    (org-insert-time-stamp nil t t ":LOGBOOK:\nAdded: " "\n:END:\n" nil)
+    (previous-line)
+    (org-cycle)))
 
 (defun bh/insert-heading-inactive-timestamp ()
   (save-excursion
