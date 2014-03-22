@@ -42,6 +42,7 @@
 
   ;; (setq cygwin-root-directory "e:/cygwin")
   ;; (require 'setup-cygwin)
+  (modify-coding-system-alist 'process "git" '(utf-8-dos . utf-8-unix))
   (modify-coding-system-alist 'process "[zZ]sh" '(utf-8-dos . utf-8-unix))
   (modify-coding-system-alist 'process "[bB]ash" '(undecided-dos . undecided-unix)))
 

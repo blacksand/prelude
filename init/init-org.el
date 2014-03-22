@@ -42,6 +42,9 @@
   (visual-line-mode 1))
 (add-hook 'org-mode-hook 'bs/soft-wrap-lines 'append)
 
+(setq org-clock-persist-file (expand-file-name "org-clock-save.el" prelude-savefile-dir))
+(setq org-id-locations-file (expand-file-name "org-id-locations" prelude-savefile-dir))
+
 (defvar bs-gtd-dir (expand-file-name "gtd" "~") "org gtd files directory.")
 (add-to-list 'org-agenda-files bs-gtd-dir)
 
@@ -297,8 +300,8 @@
 (defun bh/org-auto-exclude-function (tag)
   "Automatic task exclusion in the agenda with / RET"
   (and (cond
-        ;; ((string= tag "waiting")
-        ;;  t)
+        ((string= tag "waiting")
+         t)
         ((string= tag "hold")
          t))
        (concat "-" tag)))
@@ -1158,7 +1161,6 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (setq org-yank-adjusted-subtrees t)
 
 (setq org-id-method 'uuid)
-(setq org-id-locations-file (expand-file-name "org-id-locations" prelude-savefile-dir))
 
 (setq org-deadline-warning-days 30)
 
@@ -1174,7 +1176,6 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (setq org-log-state-notes-insert-after-drawers nil)
 
 (setq org-clock-sound "~/dotfiles/misc/sound/ah-oh.wav")
-(setq org-clock-persist-file (expand-file-name "org-clock-save.el" prelude-savefile-dir))
 
 (setq org-habit-graph-column 50)
 (run-at-time "06:00" 86400 '(lambda () (setq org-habit-show-habits t)))
@@ -1184,6 +1185,7 @@ Late deadlines first, then scheduled, then non-late deadlines"
 (org-crypt-use-before-save-magic)
 (setq org-tags-exclude-from-inheritance '("crypt"))
 ;; GPG key to use for encryption
+;; using `gpg --list-keys'
 (setq org-crypt-key "F84291EE")
 
 (setq org-crypt-disable-auto-save nil)

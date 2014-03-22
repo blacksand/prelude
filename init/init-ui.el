@@ -1,6 +1,7 @@
 ;;; init-ui.el --- setting ui options
 
 ;; Setting scroll bar
+(setq scroll-margin 5)
 (prelude-require-packages '(yascroll))
 (require 'yascroll)
 (setq yascroll:delay-to-hide nil)
