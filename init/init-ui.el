@@ -10,6 +10,10 @@
 (if (fboundp 'scroll-bar-mode)
     (scroll-bar-mode -1))
 
+(prelude-require-packages '(switch-window))
+(require 'switch-window)
+(global-set-key (kbd "C-x o") 'switch-window)
+
 ;; theme: 终端模式下的 solarized 有些问题
 (if (display-graphic-p)
     (progn
@@ -29,7 +33,8 @@
 
 (prelude-require-package 'powerline)
 (require 'powerline)
-(powerline-default-theme)
+(setq powerline-default-separator 'bar)
+(powerline-center-evil-theme)
 
 ;; Setting font
 (let ((english-font "Consolas")
