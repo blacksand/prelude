@@ -13,6 +13,7 @@
 (diminish 'whitespace-mode)
 (diminish 'visual-line-mode)
 (diminish 'abbrev-mode)
+(diminish 'projectile-mode " Pj")
 
 ;; windows 下不使用 flyspell
 (unless (eq system-type 'windows-nt)
