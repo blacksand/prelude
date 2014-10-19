@@ -1,7 +1,5 @@
-(add-to-list 'Info-default-directory-list "~/following/org-mode/doc")
-(add-to-list 'load-path (expand-file-name "~/following/org-mode/lisp"))
-(add-to-list 'load-path (expand-file-name "~/following/org-mode/contrib/lisp"))
 
+(prelude-require-packages '(org-plus-contrib org-toodledo))
 (setq org-modules (quote (org-bibtex
                           org-crypt
                           org-id
@@ -12,7 +10,6 @@
                           org-mhe
                           org-protocol
                           org-w3m)))
-
 (require 'org)
 (require 'prelude-org)
 
@@ -39,10 +36,16 @@
   (setq fill-column 1000)                 ;; use visual-mode
   (setq truncate-lines nil)
   (setq visual-line-fringe-indicators t)
-  (visual-line-mode 1))
-(add-hook 'org-mode-hook 'bs/soft-wrap-lines 'append)
+  (visual-line-mode 1)
+  (setq evil-auto-indent nil)
+  (whitespace-toggle-options 'lines-tail)) ;; turn off lines-tail
 
-(setq org-clock-persist-file (expand-file-name "org-clock-save.el" prelude-savefile-dir))
+(add-hook 'org-mode-hook
+          '(lambda ()
+            (bs/soft-wrap-lines))
+          'append)
+
+(setq org-clock-persist-file (expand-file-name "org-clock-save" prelude-savefile-dir))
 (setq org-id-locations-file (expand-file-name "org-id-locations" prelude-savefile-dir))
 
 (defvar bs-gtd-dir (expand-file-name "gtd" "~") "org gtd files directory.")
@@ -58,8 +61,6 @@
 
 (add-hook 'org-mode-hook
           (lambda ()
-            (setq evil-auto-indent nil)
-            (whitespace-toggle-options 'lines-tail) ;; turn off lines-tail
             (local-set-key "\M-\C-n"      'outline-next-visible-heading)
             (local-set-key "\M-\C-p"      'outline-previous-visible-heading)
             (local-set-key "\M-\C-f"      'outline-forward-same-level)
@@ -133,8 +134,8 @@
 (defun bh/make-org-scratch ()
   (interactive)
   (let ((temp-dir (expand-file-name "publish" (getenv "TEMP"))))
-    (find-file (expand-file-name "scratch.org" temp-dir))
-    (gnus-make-directory temp-dir)))
+    (gnus-make-directory temp-dir)
+    (find-file (expand-file-name "scratch.org" temp-dir))))
 
 (defun bh/switch-to-scratch ()
   (interactive)
@@ -142,7 +143,7 @@
 
 (setq org-todo-keywords
       '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
-        (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)")))
+        (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELED(c@/!)")))
 
 (setq org-todo-keyword-faces
       '(("TODO"      :foreground "red" :weight bold)
@@ -150,39 +151,44 @@
         ("DONE"      :foreground "forest green" :weight bold)
         ("WAITING"   :foreground "orange" :weight bold)
         ("HOLD"      :foreground "magenta" :weight bold)
-        ("CANCELLED" :foreground "forest green" :weight bold)))
+        ("CANCELED" :foreground "forest green" :weight bold)))
 
 (setq org-use-fast-todo-selection t)
 
 (setq org-treat-S-cursor-todo-selection-as-state-change nil)
 
 (setq org-todo-state-tags-triggers
-      '(("CANCELLED" ("CANCELLED" . t))
+      '(("CANCELED" ("CANCELED" . t))
         ("WAITING" ("WAITING" . t))
         ("HOLD" ("WAITING") ("HOLD" . t))
         (done ("WAITING") ("HOLD"))
-        ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
-        ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
-        ("DONE" ("WAITING") ("CANCELLED") ("HOLD"))))
+        ("TODO" ("WAITING") ("CANCELED") ("HOLD"))
+        ("NEXT" ("WAITING") ("CANCELED") ("HOLD"))
+        ("DONE" ("WAITING") ("CANCELED") ("HOLD"))))
+
+(setq org-highest-priority 65)
+(setq org-lowest-priority 69)
+(setq org-default-priority 68)
 
 (setq bs/inbox-file (expand-file-name "inbox.org" bs-gtd-dir))
 (setq org-directory (expand-file-name "~/doc/org"))
 (setq org-default-notes-file bs/inbox-file)
 (setq org-capture-templates
       '(("a" "Appointment" entry (file bs/inbox-file)
-         "* %?\n:PROPERTIES:\n:Added: %U\n:END:\n%^{Time}T" :empty-lines 1)
+         ;; "* %?\n:PROPERTIES:\n:Added: %U\n:END:\n%^{Time}T" :empty-lines 1)
+         "* %?\n%^{Time}T" :empty-lines 1)
         ("n" "Notes" entry (file bs/inbox-file)
          "* %? :NOTE:\n:PROPERTIES:\n:Added: %U\n:END:" :clock-in t :clock-resume t :empty-lines 1)
         ("t" "Task" entry (file bs/inbox-file)
-         "* TODO %?\n:PROPERTIES:\n:Added: %U\n:END:" :clock-in t :clock-resume t :empty-lines 1)
+         "* TODO %?\n" :clock-in t :clock-resume t :empty-lines 1)
         ("j" "Journal" entry (file+datetree (expand-file-name "journal.org" bs-gtd-dir))
          "* %?\n" :clock-in t :clock-resume t :empty-lines 1)
         ("w" "org-protocol" entry (file bs/inbox-file)
-         "* %? :NOTE:\n:PROPERTIES:\n:Added: %U\n:END:\n%c\n%i\n" :clock-in t :clock-resume t :empty-lines 1)
+         "* %? :NOTE:\n%c\n%i\n" :clock-in t :clock-resume t :empty-lines 1)
         ("l" "Log Time" entry (file+datetree (expand-file-name "timelog.org" bs-gtd-dir))
          "* %U - %^{Description} :TIME:\n" :immediate-finish t :empty-lines 0)
         ("h" "Habit" entry (file bs/inbox-file)
-         "* NEXT %?\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:Added: %U\n:END:"
+         "* NEXT %?\nSCHEDULED: %(format-time-string \"<%Y-%m-%d %a .+1d/3d>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: TODO\n:END:"
          :empty-lines 1)))
 
 ;; Remove empty LOGBOOK drawers on clock out
@@ -190,7 +196,7 @@
   (interactive)
   (save-excursion
     (beginning-of-line 0)
-    (org-remove-empty-drawer-at (point))))
+    (org-remove-empty-drawer-at "LOGBOOK" (point))))
 
 (add-hook 'org-clock-out-hook 'bh/remove-empty-drawer-on-clock-out 'append)
 
@@ -244,16 +250,16 @@
           (tags "INBOX"
                 ((org-agenda-overriding-header "Tasks to Refile")
                  (org-tags-match-list-sublevels nil)))
-          (tags-todo "-CANCELLED/!"
+          (tags-todo "-CANCELED/!"
                      ((org-agenda-overriding-header "Stuck Projects")
                       (org-agenda-skip-function 'bh/skip-non-stuck-projects)
                       (org-agenda-sorting-strategy '(category-keep))))
-          (tags-todo "-HOLD-CANCELLED/!"
+          (tags-todo "-HOLD-CANCELED/!"
                      ((org-agenda-overriding-header "Projects")
                       (org-agenda-skip-function 'bh/skip-non-projects)
                       (org-tags-match-list-sublevels 'indented)
                       (org-agenda-sorting-strategy '(category-keep))))
-          (tags-todo "-CANCELLED/!NEXT"
+          (tags-todo "-CANCELED/!NEXT"
                      ((org-agenda-overriding-header
                        (concat "Project Next Tasks" (if bh/hide-scheduled-and-waiting-next-tasks
                                                         ""
@@ -264,7 +270,7 @@
                       (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
                       (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
                       (org-agenda-sorting-strategy '(todo-state-down effort-up category-keep))))
-          (tags-todo "-INBOX-CANCELLED-WAITING-HOLD/!"
+          (tags-todo "-INBOX-CANCELED-WAITING-HOLD/!"
                      ((org-agenda-overriding-header
                        (concat "Project Subtasks" (if bh/hide-scheduled-and-waiting-next-tasks
                                                       ""
@@ -274,7 +280,7 @@
                       (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
                       (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
                       (org-agenda-sorting-strategy '(category-keep))))
-          (tags-todo "-INBOX-CANCELLED-WAITING-HOLD/!"
+          (tags-todo "-INBOX-CANCELED-WAITING-HOLD/!"
                      ((org-agenda-overriding-header
                        (concat "Standalone Tasks" (if bh/hide-scheduled-and-waiting-next-tasks
                                                       ""
@@ -284,12 +290,15 @@
                       (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)
                       (org-agenda-todo-ignore-with-date bh/hide-scheduled-and-waiting-next-tasks)
                       (org-agenda-sorting-strategy '(category-keep))))
-          (tags-todo "-CANCELLED+WAITING|HOLD/!"
-                     ((org-agenda-overriding-header "Waiting and Postponed Tasks")
-                      (org-agenda-skip-function 'bh/skip-stuck-projects)
-                      (org-tags-match-list-sublevels nil)
-                      (org-agenda-todo-ignore-scheduled t)
-                      (org-agenda-todo-ignore-deadlines t)))
+          (tags-todo "-CANCELED+WAITING|HOLD/!"
+                      ((org-agenda-overriding-header (concat "Waiting and Postponed Tasks"
+                        (if bh/hide-scheduled-and-waiting-next-tasks
+                             ""
+                          " (including WAITING and SCHEDULED tasks)")))
+                       (org-agenda-skip-function 'bh/skip-non-tasks)
+                       (org-tags-match-list-sublevels nil)
+                       (org-agenda-todo-ignore-scheduled bh/hide-scheduled-and-waiting-next-tasks)
+                       (org-agenda-todo-ignore-deadlines bh/hide-scheduled-and-waiting-next-tasks)))
           (tags "-INBOX/"
                 ((org-agenda-overriding-header "Tasks to Archive")
                  (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
@@ -466,11 +475,11 @@ the next one. A prefix arg forces clock in of the default task."
                             ("@work"   . ?w)
                             ("@home"   . ?h)
                             ("@errand" . ?e)
-                            (:endgroup)
                             ("@pc"     . ?p)
-                            ("@call"   . ?c)
-                            ("@shop"   . ?s)
-                            ("@idle"   . ?i)
+                            ("@any"   .  ?a)
+                            (:endgroup)
+                            ("shop"   .  ?s)
+                            ("idle"   .  ?i)
                             ("crypt"   . ?E)
                             ("NOTE"    . ?n)
                             ("FLAGGED" . ??)
@@ -478,7 +487,7 @@ the next one. A prefix arg forces clock in of the default task."
                             ("PERSONAL")
                             ("HOLD")
                             ("WAITING")
-                            ("CANCELLED"))))
+                            ("CANCELED"))))
 
 ;; Allow setting single tags without the menu
 (setq org-fast-tag-selection-single-key (quote expert))
@@ -871,16 +880,18 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
     (bh/narrow-to-org-subtree)))
 
 (defun bh/get-pom-from-agenda-restriction-or-point ()
-  (or (org-get-at-bol 'org-hd-marker)
-      (and (marker-position org-agenda-restrict-begin) org-agenda-restrict-begin)
+  (or (and (marker-position org-agenda-restrict-begin) org-agenda-restrict-begin)
+      (org-get-at-bol 'org-hd-marker)
       (and (equal major-mode 'org-mode) (point))
       org-clock-marker))
 
 (defun bh/narrow-up-one-level ()
   (interactive)
   (if (equal major-mode 'org-agenda-mode)
-      (org-with-point-at (bh/get-pom-from-agenda-restriction-or-point)
-        (bh/narrow-up-one-org-level))
+      (progn
+        (org-with-point-at (bh/get-pom-from-agenda-restriction-or-point)
+          (bh/narrow-up-one-org-level))
+        (org-agenda-redo))
     (bh/narrow-up-one-org-level)))
 
 (add-hook 'org-agenda-mode-hook
@@ -1253,7 +1264,7 @@ Late deadlines first, then scheduled, then non-late deadlines"
 
 (require 'org-protocol)
 
-(defvar bh/insert-inactive-timestamp t)
+(defvar bh/insert-inactive-timestamp nil)
 
 (defun bh/toggle-insert-inactive-timestamp ()
   (interactive)
@@ -1334,8 +1345,33 @@ Late deadlines first, then scheduled, then non-late deadlines"
 
 (setq org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
 
-(require 'org-mobile)
-(setq org-mobile-directory "~/Dropbox/MobileOrg")
+(require 'org-toodledo)
+(org-toodledo-make-lookup-function "context")
+
+(setq org-toodledo-userid "td4c4483d1bcb0a")
+(setq org-toodledo-password "yuafyuaf")
+(setq org-toodledo-sync-on-save "no")
+(setq org-toodledo-preserve-drawers t)
+(setq org-toodledo-flatten-all-tasks t)
+(setq org-toodledo-indent-task-note nil)
+(setq org-toodledo-archive-deleted-tasks t)
+(setq org-toodledo-archive-completed-tasks nil)
+(setq org-toodledo-sync-new-completed-tasks nil)
+
+(setq org-toodledo-status-to-org-map (quote (
+                    ("Active" . "TODO")
+                    ("None" . "TODO")
+                    ("Next Action" . "NEXT")
+                    ("Planning" . "TODO")
+                    ("Waiting" . "WAITING")
+                    ("Delegated" . "WAITING")
+                    ("Someday" . "HOLD")
+                    ("Hold" . "HOLD")
+                    ("Postponed" . "HOLD")
+                    ("Canceled" . "CANCELED")
+                    ("Reference" . "NOTE"))))
+
+(setq org-toodledo-folder-support-mode 'heading)
 
 (setq org-emphasis-alist '(("*" bold)
                            ("/" italic)

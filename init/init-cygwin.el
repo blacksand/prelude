@@ -10,6 +10,7 @@
   (setq shell-file-name "bash")
   (setq explicit-shell-file-name "zsh")
   (setq explicit-zsh-args '("--login" "-i"))
+  (setenv "PATH" (concat "e:/cygwin/bin;" (getenv "PATH")))
   ;; (setq w32-quote-process-args ?\") ;; should be "t" ?
 
   (setenv "SHELL" explicit-shell-file-name)
@@ -33,7 +34,8 @@
   (interactive)
   (set-shell-cygwin)
   (shell)
-  (set-shell-cmdproxy))
+  ;; (set-shell-cmdproxy)
+  )
 
 (defun cygwin-environ-setup ()
   (prelude-require-package 'cygwin-mount)

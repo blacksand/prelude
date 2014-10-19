@@ -5,8 +5,31 @@
 
 ;;; Code:
 
+;; 使用 wallproxy 代理服务器
+(defun bs/set-local-proxy (arg)
+  "Set proxy for url."
+  (interactive "p")
+  (if (eq arg 4)
+      (setq url-proxy-services nil)
+    (setq url-proxy-services
+          '(("no_proxy" . "^\\(localhost\\|10\\..*\\|192\\.168.*\\)")
+            ("http" . "127.0.0.1:8086")))))
+
+(prelude-require-packages '(google-translate google-this))
+(require 'google-translate)
+(setq google-translate-default-source-language "en")
+(setq google-translate-default-target-language "zh-CN")
+(setq google-translate-output-destination 'echo-area)
+
+(require 'google-this)
+(google-this-mode 1)
+(define-key google-this-mode-submap "d" 'google-translate-at-point)
+
 ;; 不用 guru 模式
 (setq prelude-guru nil)
+
+;; 不使用 perlude 的切换 buffer 时自动保存
+(setq prelude-auto-save nil)
 
 ;; 隐藏一些不需要的模式行信息
 (diminish 'prelude-mode)
@@ -20,7 +43,7 @@
   (flyspell-prog-mode))
 
 ;; 备份目录
-(let ((backup-directory "~/.emacs.d/backup"))
+(let ((backup-directory "~/.emacs.d/backup/"))
   (unless (file-directory-p backup-directory)
     (make-directory backup-directory))
 
@@ -34,15 +57,14 @@
 (if (eq system-type 'windows-nt)
     (progn
       (setenv "PERL5LIB" "/e/home/perl5/lib/perl5")
-      (setq ack-and-a-half-executable "/usr/local/bin/ack")
-      ))
+      (setq ack-and-a-half-executable "/usr/local/bin/ack")))
 
 ;; 默认 text 模式打开所有文件
 (set-default major-mode 'text-mode)
 
 ;; 鼠标避让
 (if (functionp 'mouse-avoidance-mode)
-    (mouse-avoidance-mode 'banish))
+    (mouse-avoidance-mode 'cat-and-mouse))
 
 ;; 使用 cal-china-x 中文日历
 (require 'cal-china-x)
