@@ -10,9 +10,12 @@
 (if (fboundp 'scroll-bar-mode)
     (scroll-bar-mode -1))
 
-(prelude-require-packages '(switch-window))
-(require 'switch-window)
-(global-set-key (kbd "C-x o") 'switch-window)
+;; (prelude-require-packages '(switch-window))
+;; (require 'switch-window)
+;; (global-set-key (kbd "C-x o") 'switch-window)
+(prelude-require-packages '(window-number))
+(require 'window-number)
+(window-number-mode 1)
 
 ;; theme: 终端模式下的 solarized 有些问题
 (if (display-graphic-p)
@@ -27,13 +30,13 @@
       (setq solarized-height-plus-1 1.1)
       (setq solarized-height-plus-2 1.1)
       (setq solarized-height-plus-3 1.1)
-      (setq solarized-height-plus-4 1.1)
+      (setq solarized-height-plus-4 1.05)
 
       (load-theme 'solarized-dark t)))
 
 (prelude-require-package 'powerline)
 (require 'powerline)
-(setq powerline-default-separator 'bar)
+(setq powerline-default-separator 'slant)
 (powerline-center-evil-theme)
 
 ;; Setting font
@@ -48,6 +51,19 @@
         (set-fontset-font (frame-parameter nil 'font)
                           charset
                           (font-spec :family chinese-font :height 128)))))
+
+;; Emacs does not beep or flash anymore,
+;; on hit C-g in the minibuffer or during
+;; an isearch.
+(setq ring-bell-function
+      (lambda ()
+        (unless (memq this-command
+                      '(isearch-abort
+                        abort-recursive-edit
+                        exit-minibuffer
+                        keyboard-quit))
+          ;; (ding))))
+          (message "*BEEP* : %s" this-command))))
 
 (provide 'init-ui)
 

@@ -16,6 +16,7 @@
 ;; load needed modules
 ;; (require 'init-encoding)     ; windows encoding settings
 (require 'init-ui)              ; gui, fonts
+(require 'init-magit)
 (require 'init-sdcv)            ; before the `init-cygwin'
 (if (eq system-type 'windows-nt)
     (require 'init-cygwin))     ; bash, zsh

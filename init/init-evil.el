@@ -5,6 +5,7 @@
                             evil-leader
                             evil-matchit
                             evil-numbers
+                            evil-org
                             evil-visualstar
                             surround))
 
@@ -50,6 +51,8 @@
 
 (require 'surround)
 (global-surround-mode 1)
+
+;;(require 'evil-org)
 
 (require 'evil-matchit)
 (global-evil-matchit-mode 1)
@@ -117,6 +120,7 @@
   "fe" 'end-of-defun
   "fr" 'revert-buffer ;; file read
   "fw" 'save-buffer   ;; file write
+  "g"  'google-this-mode-submap
   "lp" 'package-list-packages
   "man" '(lambda () (interactive) (man (concat "-k " (thing-at-point 'symbol))))
   "mf" 'mark-defun
